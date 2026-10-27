@@ -1,0 +1,24 @@
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Platform, IonItem, IonLabel, IonNote, IonIcon } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { chevronForward } from 'ionicons/icons';
+
+import type { Message } from '../services/data.service';
+
+@Component({
+  selector: 'app-message',
+  templateUrl: './message.component.html',
+  styleUrls: ['./message.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, IonItem, IonLabel, IonNote, IonIcon],
+})
+export class MessageComponent {
+  private platform = inject(Platform);
+  readonly message = input<Message>();
+  readonly isIos = this.platform.is('ios');
+
+  constructor() {
+    addIcons({ chevronForward });
+  }
+}
