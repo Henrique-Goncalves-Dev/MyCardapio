@@ -30,8 +30,9 @@ export interface Establishment {
   whatsapp?: string;
   description?: string;
   image?: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
+  published?: boolean;
   temporarilyClosed?: boolean;
   hours: Record<string, OpeningPeriod[]>;
   categories: MenuCategory[];

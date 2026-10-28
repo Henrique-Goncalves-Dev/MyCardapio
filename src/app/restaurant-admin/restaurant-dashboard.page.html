@@ -11,12 +11,15 @@
 
       <section class="dashboard-heading">
         <div>
-          <p class="admin-kicker">Área do estabelecimento · prévia local</p>
+            <p class="admin-kicker">Área do estabelecimento</p>
           <h1>Olá, {{ restaurant.name }}.</h1>
           <p>Cuide das informações que aparecem para quem consulta seu cardápio.</p>
         </div>
         <button type="button" class="status-toggle" [class.is-closed]="restaurant.temporarilyClosed" (click)="toggleClosed()">
           <span class="status-dot"></span>{{ restaurant.temporarilyClosed ? 'Fechado temporariamente' : 'Aberto conforme horário' }}
+        </button>
+        <button type="button" class="status-toggle" (click)="togglePublished()">
+          {{ restaurant.published ? 'Retirar do catálogo' : 'Publicar página' }}
         </button>
       </section>
 
@@ -103,11 +106,13 @@
               <ion-button class="admin-primary" expand="block" [disabled]="!restaurant.categories.length" (click)="addItem()"><ion-icon slot="start" name="add-outline"></ion-icon>Adicionar item</ion-button>
             </section>
           </div>
-          <p class="menu-save-hint"><ion-icon name="checkmark-outline"></ion-icon> Suas edições são salvas automaticamente nesta prévia local.</p>
+          <p class="menu-save-hint"><ion-icon name="checkmark-outline"></ion-icon> Suas edições são salvas automaticamente no Supabase.</p>
         </section>
       }
-      <footer class="dashboard-footer"><span>Prévia local · Os dados ficam salvos neste navegador.</span><a [routerLink]="['/estabelecimento', restaurant.slug]">Abrir página pública <ion-icon name="arrow-forward-outline"></ion-icon></a></footer>
+      <footer class="dashboard-footer"><span>Perfil e cardápio salvos na sua conta.</span><a [routerLink]="['/estabelecimento', restaurant.slug]">Abrir página pública <ion-icon name="arrow-forward-outline"></ion-icon></a></footer>
     </main>
+  } @else if (loadError) {
+    <main class="dashboard-loading" role="alert"><p>{{ loadError }}</p><a routerLink="/gestao/entrar">Voltar ao acesso</a></main>
   } @else {
     <div class="dashboard-loading" aria-label="Carregando gestão"><span></span></div>
   }

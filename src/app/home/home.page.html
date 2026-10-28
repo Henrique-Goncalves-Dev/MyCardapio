@@ -74,7 +74,13 @@
         }
       </div>
 
-      @if (results().length) {
+      @if (catalogError()) {
+        <div class="empty-state" role="alert">
+          <h3>Catálogo indisponível</h3>
+          <p>{{ catalogError() }}</p>
+          <button class="text-button" type="button" (click)="loadCatalog()">Tentar novamente</button>
+        </div>
+      } @else if (results().length) {
         <div class="establishment-list">
           @for (entry of results(); track entry.id; let index = $index) {
             <article class="establishment-row">

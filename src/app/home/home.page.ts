@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
@@ -32,7 +32,7 @@ type LocationState = 'idle' | 'loading' | 'ready' | 'denied' | 'unavailable';
     IonIcon,
   ],
 })
-export class HomePage {
+export class HomePage implements OnInit {
   private readonly data = inject(EstablishmentService);
   private readonly entries = this.data.establishments;
 
@@ -40,6 +40,7 @@ export class HomePage {
   protected readonly selectedCuisine = signal('Tudo');
   protected readonly locationState = signal<LocationState>('idle');
   protected readonly locationMessage = signal('');
+  protected readonly catalogError = signal('');
   protected readonly cuisines = computed(() => ['Tudo', ...new Set(this.entries().flatMap((item) => item.cuisines))]);
   protected readonly results = computed(() => {
     const term = this.query().trim().toLocaleLowerCase('pt-BR');
@@ -72,6 +73,19 @@ export class HomePage {
 
   constructor() {
     addIcons({ arrowForwardOutline, locationOutline, navigateOutline, searchOutline, timeOutline });
+  }
+
+  ngOnInit(): void {
+    void this.loadCatalog();
+  }
+
+  protected async loadCatalog(): Promise<void> {
+    this.catalogError.set('');
+    try {
+      await this.data.loadCatalog();
+    } catch {
+      this.catalogError.set('Não foi possível carregar os cardápios. Confira se a API está iniciada e tente novamente.');
+    }
   }
 
   protected search(value: string): void {

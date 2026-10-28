@@ -32,14 +32,19 @@ export class EstablishmentDetailPage {
   private readonly data = inject(EstablishmentService);
 
   protected readonly entry = signal<Establishment | undefined>(undefined);
+  protected readonly loading = signal(true);
   protected readonly activeCategory = signal('');
 
   constructor() {
     addIcons({ arrowBackOutline, arrowForwardOutline, callOutline, locationOutline, navigateOutline, timeOutline });
     this.route.paramMap.subscribe((params) => {
-      const entry = this.data.getBySlug(params.get('slug') ?? '');
-      this.entry.set(entry);
-      this.activeCategory.set(entry?.categories[0]?.id ?? '');
+      this.loading.set(true);
+      void this.data.getBySlug(params.get('slug') ?? '').then((entry) => {
+        this.entry.set(entry);
+        this.activeCategory.set(entry.categories[0]?.id ?? '');
+      }).catch(() => {
+        this.entry.set(undefined);
+      }).finally(() => this.loading.set(false));
     });
   }
 

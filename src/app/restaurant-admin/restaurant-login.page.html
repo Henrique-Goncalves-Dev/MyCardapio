@@ -17,18 +17,17 @@
           <p class="admin-kicker">Área do estabelecimento</p>
           <h2>Entrar na gestão</h2>
         </div>
-        <p class="demo-note">Prévia local: o acesso é simulado e não envia dados para um servidor.</p>
+        @if (confirmationNotice) { <p class="form-hint" role="status">{{ confirmationNotice }}</p> }
         <label class="field">
           <span>E-mail</span>
           <input type="email" name="email" [(ngModel)]="email" placeholder="voce@seuestabelecimento.com" autocomplete="email" required />
         </label>
         <label class="field">
           <span>Senha</span>
-          <input type="password" name="password" [(ngModel)]="password" placeholder="Pelo menos 6 caracteres" autocomplete="current-password" required minlength="6" />
+          <input type="password" name="password" [(ngModel)]="password" placeholder="Sua senha" autocomplete="current-password" required minlength="6" />
         </label>
         @if (errorMessage) { <p class="form-alert" role="alert">{{ errorMessage }}</p> }
-        <ion-button class="admin-primary" expand="block" type="submit">Entrar <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
-        <button class="demo-button" type="button" (click)="enterDemo()">Explorar a gestão de exemplo</button>
+        <ion-button class="admin-primary" expand="block" type="submit" [disabled]="submitting">{{ submitting ? 'Entrando…' : 'Entrar' }} <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
         <p class="signup-prompt">Ainda não tem cadastro? <a routerLink="/gestao/cadastro">Cadastrar estabelecimento</a></p>
       </form>
     </section>

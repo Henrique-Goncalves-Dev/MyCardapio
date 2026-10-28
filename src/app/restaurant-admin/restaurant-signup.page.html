@@ -27,19 +27,17 @@
             <h2>Crie sua conta</h2>
             <p class="form-hint">Use o e-mail que você vai acessar para cuidar do cardápio.</p>
             <label class="field"><span>E-mail</span><input type="email" name="email" [(ngModel)]="email" placeholder="voce@seuestabelecimento.com" autocomplete="email" required /></label>
-            <label class="field"><span>Senha</span><input type="password" name="password" [(ngModel)]="password" placeholder="Pelo menos 6 caracteres" autocomplete="new-password" required minlength="6" /></label>
+            <label class="field"><span>Senha</span><input type="password" name="password" [(ngModel)]="password" placeholder="Pelo menos 8 caracteres" autocomplete="new-password" required minlength="8" /></label>
             @if (errorMessage) { <p class="form-alert" role="alert">{{ errorMessage }}</p> }
-            <ion-button class="admin-primary" expand="block" type="submit">Continuar <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
-            <p class="form-hint prototype-note">Protótipo: a verificação de e-mail é simulada nesta etapa.</p>
+            <ion-button class="admin-primary" expand="block" type="submit" [disabled]="submitting">{{ submitting ? 'Criando conta…' : 'Criar conta' }} <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
           </form>
         } @else if (step === 2) {
           <div class="verification-step">
             <span class="verification-mark"><ion-icon name="checkmark-outline"></ion-icon></span>
             <p class="admin-kicker">Confirme seu e-mail</p>
             <h2>Quase lá.</h2>
-            <p>Em uma versão conectada, enviaríamos uma mensagem de confirmação para <strong>{{ email }}</strong>.</p>
-            <p class="demo-note">Aqui, você pode simular a confirmação para continuar explorando o cadastro.</p>
-            <ion-button class="admin-primary" expand="block" (click)="confirmDemoEmail()">Simular confirmação <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
+            <p>Enviamos uma mensagem de confirmação para <strong>{{ email }}</strong>. Abra o link e depois entre para continuar o cadastro do seu estabelecimento.</p>
+            <ion-button class="admin-primary" expand="block" (click)="goToSignIn()">Já confirmei, entrar <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
             <button class="back-step" type="button" (click)="step = 1">Voltar e corrigir o e-mail</button>
           </div>
         } @else if (step === 3) {
@@ -73,7 +71,7 @@
             </div>
             <p class="form-hint">Esse horário padrão será aplicado a todos os dias. Você poderá ajustar a semana na gestão.</p>
             @if (errorMessage) { <p class="form-alert" role="alert">{{ errorMessage }}</p> }
-            <ion-button class="admin-primary" expand="block" type="submit">Continuar para o cardápio <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
+            <ion-button class="admin-primary" expand="block" type="submit" [disabled]="submitting">{{ submitting ? 'Salvando perfil…' : 'Continuar para o cardápio' }} <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
           </form>
         } @else {
           <div class="menu-setup">
@@ -115,13 +113,13 @@
               </div>
             }
             @if (errorMessage) { <p class="form-alert" role="alert">{{ errorMessage }}</p> }
-            <ion-button class="admin-primary" expand="block" (click)="publish()">Publicar cardápio <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
+            <ion-button class="admin-primary" expand="block" (click)="publish()" [disabled]="submitting">{{ submitting ? 'Publicando…' : 'Publicar cardápio' }} <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
             <button class="back-step" type="button" (click)="step = 3">Voltar ao perfil</button>
           </div>
         }
       </div>
     </section>
 
-    <footer class="admin-footer">Prévia local · A confirmação por e-mail e a publicação real serão conectadas ao backend depois</footer>
+    <footer class="admin-footer">Uma conta por estabelecimento · Seu cardápio fica salvo no Supabase</footer>
   </main>
 </ion-content>

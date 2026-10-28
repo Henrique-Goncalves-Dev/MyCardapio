@@ -16,7 +16,8 @@ import {
 } from 'ionicons/icons';
 
 import type { Establishment, MenuItem, OpeningPeriod } from '../models/establishment';
-import { DemoSessionService, EstablishmentService } from '../services/establishment.service';
+import { ApiError, ApiService } from '../services/api.service';
+import { EstablishmentService } from '../services/establishment.service';
 
 const DAYS = [
   ['mon', 'Segunda'],
@@ -39,7 +40,8 @@ const copyEntry = (entry: Establishment): Establishment => JSON.parse(JSON.strin
 export class RestaurantDashboardPage implements OnInit {
   private readonly router = inject(Router);
   private readonly entries = inject(EstablishmentService);
-  private readonly session = inject(DemoSessionService);
+  private readonly api = inject(ApiService);
+  private menuSaveChain: Promise<void> = Promise.resolve();
 
   protected readonly days = DAYS;
   protected draft: Establishment | null = null;
@@ -51,6 +53,7 @@ export class RestaurantDashboardPage implements OnInit {
   protected newItemDescription = '';
   protected newItemPrice: number | null = null;
   protected savedMessage = '';
+  protected loadError = '';
 
   constructor() {
     addIcons({
@@ -66,33 +69,48 @@ export class RestaurantDashboardPage implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    const activeSlug = this.session.getActiveSlug();
-    const entry = activeSlug ? this.entries.getBySlug(activeSlug) : undefined;
-    if (!entry) {
-      void this.router.navigateByUrl('/gestao/entrar');
-      return;
+  async ngOnInit(): Promise<void> {
+    try {
+      const entry = await this.entries.getMine();
+      this.draft = copyEntry(entry);
+      this.cuisineText = entry.cuisines.join(', ');
+      this.newItemCategoryId = entry.categories[0]?.id ?? '';
+      this.ensureHours();
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        void this.router.navigateByUrl('/gestao/entrar');
+      } else if (error instanceof ApiError && error.status === 404) {
+        void this.router.navigateByUrl('/gestao/cadastro?perfil=1');
+      } else {
+        this.loadError = error instanceof Error ? error.message : 'Não foi possível carregar a gestão.';
+      }
     }
-    this.draft = copyEntry(entry);
-    this.cuisineText = entry.cuisines.join(', ');
-    this.newItemCategoryId = entry.categories[0]?.id ?? '';
-    this.ensureHours();
   }
 
   protected saveProfile(): void {
     if (!this.draft) return;
     this.draft.cuisines = this.cuisineText.split(',').map((cuisine) => cuisine.trim()).filter(Boolean);
-    this.persist('Perfil atualizado. As mudanças já aparecem no catálogo público.');
+    this.persistProfile('Perfil atualizado e salvo no Supabase.');
   }
 
   protected saveMenu(): void {
-    this.persist('Cardápio atualizado e salvo nesta prévia.');
+    this.persistMenu('Cardápio atualizado e salvo no Supabase.');
   }
 
   protected toggleClosed(): void {
     if (!this.draft) return;
     this.draft.temporarilyClosed = !this.draft.temporarilyClosed;
-    this.persist(this.draft.temporarilyClosed ? 'Estabelecimento marcado como fechado.' : 'Estabelecimento marcado como aberto conforme os horários.');
+    this.persistProfile(this.draft.temporarilyClosed ? 'Estabelecimento marcado como fechado.' : 'Estabelecimento marcado como aberto conforme os horários.');
+  }
+
+  protected async togglePublished(): Promise<void> {
+    if (!this.draft) return;
+    try {
+      this.draft.published = await this.entries.publish(!this.draft.published);
+      this.showSavedMessage(this.draft.published ? 'Página publicada no catálogo.' : 'Página retirada do catálogo.');
+    } catch (error) {
+      this.showSavedMessage(error instanceof Error ? error.message : 'Não foi possível alterar a publicação.');
+    }
   }
 
   protected addCategory(): void {
@@ -168,14 +186,30 @@ export class RestaurantDashboardPage implements OnInit {
     this.saveMenu();
   }
 
-  protected signOut(): void {
-    this.session.signOut();
-    void this.router.navigateByUrl('/home');
+  protected async signOut(): Promise<void> {
+    await this.api.signOut();
+    await this.router.navigateByUrl('/home');
   }
 
-  private persist(message: string): void {
+  private persistProfile(message: string): void {
     if (!this.draft) return;
-    this.entries.save(copyEntry(this.draft));
+    void this.entries.saveProfile(copyEntry(this.draft)).then(() => this.showSavedMessage(message)).catch((error: unknown) => {
+      this.showSavedMessage(error instanceof Error ? error.message : 'Não foi possível salvar o perfil.');
+    });
+  }
+
+  private persistMenu(message: string): void {
+    if (!this.draft) return;
+    const categories = copyEntry(this.draft).categories;
+    this.menuSaveChain = this.menuSaveChain.then(async () => {
+      await this.entries.saveMenu(categories);
+      this.showSavedMessage(message);
+    }).catch((error: unknown) => {
+      this.showSavedMessage(error instanceof Error ? error.message : 'Não foi possível salvar o cardápio.');
+    });
+  }
+
+  private showSavedMessage(message: string): void {
     this.savedMessage = message;
     window.setTimeout(() => {
       if (this.savedMessage === message) this.savedMessage = '';
