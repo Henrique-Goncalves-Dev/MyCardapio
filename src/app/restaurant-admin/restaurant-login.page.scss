@@ -1,0 +1,23 @@
+.demo-button {
+  min-height: 43px;
+  border: 1px solid #cfdbd0;
+  border-radius: 4px;
+  background: #fff;
+  color: var(--app-pine);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.signup-prompt {
+  margin: 0;
+  color: #728178;
+  font-size: 12px;
+  text-align: center;
+}
+
+.signup-prompt a {
+  color: var(--app-leaf);
+  font-weight: 750;
+  text-decoration: none;
+}

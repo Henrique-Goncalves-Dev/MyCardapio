@@ -1,0 +1,38 @@
+<ion-content [fullscreen]="true">
+  <main class="admin-page">
+    <header class="admin-topbar">
+      <a class="admin-brand" routerLink="/home"><span class="admin-brand-mark" aria-hidden="true"><img src="assets/icon/meu-cardapio-pin.png" alt="" /></span><span>meu<span>cardápio</span></span></a>
+      <a class="admin-top-link" routerLink="/home">Voltar ao catálogo</a>
+    </header>
+
+    <section class="admin-layout">
+      <div class="admin-intro">
+        <p class="admin-kicker">Para quem serve</p>
+        <h1>Seu cardápio<br />no lugar certo.</h1>
+        <p>Atualize seus pratos, horários e informações. Quem está por perto encontra tudo em uma página só.</p>
+      </div>
+
+      <form class="admin-form" (ngSubmit)="signIn()">
+        <div>
+          <p class="admin-kicker">Área do estabelecimento</p>
+          <h2>Entrar na gestão</h2>
+        </div>
+        <p class="demo-note">Prévia local: o acesso é simulado e não envia dados para um servidor.</p>
+        <label class="field">
+          <span>E-mail</span>
+          <input type="email" name="email" [(ngModel)]="email" placeholder="voce@seuestabelecimento.com" autocomplete="email" required />
+        </label>
+        <label class="field">
+          <span>Senha</span>
+          <input type="password" name="password" [(ngModel)]="password" placeholder="Pelo menos 6 caracteres" autocomplete="current-password" required minlength="6" />
+        </label>
+        @if (errorMessage) { <p class="form-alert" role="alert">{{ errorMessage }}</p> }
+        <ion-button class="admin-primary" expand="block" type="submit">Entrar <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
+        <button class="demo-button" type="button" (click)="enterDemo()">Explorar a gestão de exemplo</button>
+        <p class="signup-prompt">Ainda não tem cadastro? <a routerLink="/gestao/cadastro">Cadastrar estabelecimento</a></p>
+      </form>
+    </section>
+
+    <footer class="admin-footer">Uma conta por estabelecimento · Cardápio público sem cadastro para visitantes</footer>
+  </main>
+</ion-content>

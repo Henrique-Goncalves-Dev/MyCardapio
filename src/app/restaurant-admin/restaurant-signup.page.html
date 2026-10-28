@@ -1,0 +1,127 @@
+<ion-content [fullscreen]="true">
+  <main class="admin-page">
+    <header class="admin-topbar">
+      <a class="admin-brand" routerLink="/home"><span class="admin-brand-mark" aria-hidden="true"><img src="assets/icon/meu-cardapio-pin.png" alt="" /></span><span>meu<span>cardápio</span></span></a>
+      <a class="admin-top-link" routerLink="/gestao/entrar">Já tenho conta</a>
+    </header>
+
+    <section class="admin-layout signup-layout">
+      <div class="admin-intro">
+        <p class="admin-kicker">Seu espaço no catálogo</p>
+        <h1>Um bom cardápio<br />merece ser visto.</h1>
+        <p>Cadastre o seu estabelecimento e deixe o cardápio fácil de encontrar e consultar.</p>
+        <div class="signup-note"><span aria-hidden="true">✳</span><p>Uma conta representa um endereço. Você organiza as categorias e os itens do seu jeito.</p></div>
+      </div>
+
+      <div class="admin-form signup-form">
+        <div class="stepper" aria-label="Etapas do cadastro">
+          @for (stepNumber of [1, 2, 3, 4]; track stepNumber) {
+            <span class="step-dot" [class.active]="step === stepNumber" [attr.aria-current]="step === stepNumber ? 'step' : null"></span>
+          }
+          <span class="step-label">Etapa {{ step }} de 4</span>
+        </div>
+
+        @if (step === 1) {
+          <form (ngSubmit)="continueAccount()">
+            <p class="admin-kicker">Acesso da gestão</p>
+            <h2>Crie sua conta</h2>
+            <p class="form-hint">Use o e-mail que você vai acessar para cuidar do cardápio.</p>
+            <label class="field"><span>E-mail</span><input type="email" name="email" [(ngModel)]="email" placeholder="voce@seuestabelecimento.com" autocomplete="email" required /></label>
+            <label class="field"><span>Senha</span><input type="password" name="password" [(ngModel)]="password" placeholder="Pelo menos 6 caracteres" autocomplete="new-password" required minlength="6" /></label>
+            @if (errorMessage) { <p class="form-alert" role="alert">{{ errorMessage }}</p> }
+            <ion-button class="admin-primary" expand="block" type="submit">Continuar <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
+            <p class="form-hint prototype-note">Protótipo: a verificação de e-mail é simulada nesta etapa.</p>
+          </form>
+        } @else if (step === 2) {
+          <div class="verification-step">
+            <span class="verification-mark"><ion-icon name="checkmark-outline"></ion-icon></span>
+            <p class="admin-kicker">Confirme seu e-mail</p>
+            <h2>Quase lá.</h2>
+            <p>Em uma versão conectada, enviaríamos uma mensagem de confirmação para <strong>{{ email }}</strong>.</p>
+            <p class="demo-note">Aqui, você pode simular a confirmação para continuar explorando o cadastro.</p>
+            <ion-button class="admin-primary" expand="block" (click)="confirmDemoEmail()">Simular confirmação <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
+            <button class="back-step" type="button" (click)="step = 1">Voltar e corrigir o e-mail</button>
+          </div>
+        } @else if (step === 3) {
+          <form (ngSubmit)="continueProfile()">
+            <p class="admin-kicker">Perfil público</p>
+            <h2>Conte sobre o lugar</h2>
+            <p class="form-hint">O nome, o tipo de comida e o endereço ajudam as pessoas a encontrar você.</p>
+            <label class="field"><span>Nome do estabelecimento</span><input name="name" [(ngModel)]="name" placeholder="Ex.: Casa do Caju" required /></label>
+            <div class="field">
+              <span class="field-label">Tipos de comida</span>
+              <div class="signup-cuisines">
+                @for (cuisine of cuisineOptions; track cuisine) {
+                  <button class="signup-chip" type="button" [class.selected]="cuisines.includes(cuisine)" (click)="toggleCuisine(cuisine)">{{ cuisine }}</button>
+                }
+              </div>
+            </div>
+            <div class="field-row">
+              <label class="field"><span>Cidade</span><input name="city" [(ngModel)]="city" required /></label>
+              <label class="field"><span>Bairro</span><input name="neighborhood" [(ngModel)]="neighborhood" placeholder="Ex.: Aldeota" /></label>
+            </div>
+            <label class="field"><span>Endereço</span><input name="address" [(ngModel)]="address" placeholder="Rua e número" required /></label>
+            <div class="field-row">
+              <label class="field"><span>Telefone <small>opcional</small></span><input name="phone" [(ngModel)]="phone" type="tel" placeholder="(85) 3000-0000" /></label>
+              <label class="field"><span>WhatsApp <small>opcional</small></span><input name="whatsapp" [(ngModel)]="whatsapp" type="tel" placeholder="(85) 90000-0000" /></label>
+            </div>
+            <label class="field"><span>Descrição <small>opcional</small></span><textarea name="description" [(ngModel)]="description" placeholder="O que torna seu lugar especial?"></textarea></label>
+            <label class="field"><span>Link da foto <small>opcional nesta prévia</small></span><input name="image" [(ngModel)]="image" type="url" placeholder="https://..." /></label>
+            <div class="field-row hour-defaults">
+              <label class="field"><span>Abre às</span><input name="openTime" [(ngModel)]="openTime" type="time" /></label>
+              <label class="field"><span>Fecha às</span><input name="closeTime" [(ngModel)]="closeTime" type="time" /></label>
+            </div>
+            <p class="form-hint">Esse horário padrão será aplicado a todos os dias. Você poderá ajustar a semana na gestão.</p>
+            @if (errorMessage) { <p class="form-alert" role="alert">{{ errorMessage }}</p> }
+            <ion-button class="admin-primary" expand="block" type="submit">Continuar para o cardápio <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
+          </form>
+        } @else {
+          <div class="menu-setup">
+            <p class="admin-kicker">Cardápio</p>
+            <h2>Adicione uma categoria</h2>
+            <p class="form-hint">Você precisa de ao menos uma categoria e um item para publicar.</p>
+
+            <div class="category-add-row">
+              <input aria-label="Nome da categoria" [(ngModel)]="newCategoryName" placeholder="Ex.: Pratos executivos" />
+              <ion-button class="icon-add" aria-label="Adicionar categoria" (click)="addCategory()"><ion-icon name="add-outline"></ion-icon></ion-button>
+            </div>
+            @if (categories.length) {
+              <div class="category-pills">
+                @for (category of categories; track category.id) {
+                  <div class="category-pill" [class.selected]="selectedCategoryId === category.id">
+                    <button type="button" (click)="selectedCategoryId = category.id">{{ category.name }} <span>{{ category.items.length }}</span></button>
+                    <button type="button" class="remove-pill" aria-label="Remover categoria" (click)="removeCategory(category.id)"><ion-icon name="close-outline"></ion-icon></button>
+                  </div>
+                }
+              </div>
+              <div class="item-add-panel">
+                <p class="field-label">Primeiro item</p>
+                <label class="field"><span>Nome</span><input [(ngModel)]="newItemName" placeholder="Ex.: Carne de sol da casa" /></label>
+                <label class="field"><span>Descrição <small>opcional</small></span><input [(ngModel)]="newItemDescription" placeholder="Acompanhamentos e detalhes" /></label>
+                <label class="field"><span>Preço</span><div class="price-input"><span>R$</span><input [(ngModel)]="newItemPrice" type="number" min="0" step="0.01" placeholder="0,00" /></div></label>
+                <ion-button class="admin-secondary" expand="block" (click)="addItem()"><ion-icon slot="start" name="add-outline"></ion-icon>Adicionar item</ion-button>
+              </div>
+              @for (category of categories; track category.id) {
+                @if (category.items.length) {
+                  <div class="added-items"><strong>{{ category.name }}</strong>@for (item of category.items; track item.id) { <span>{{ item.name }} <button type="button" aria-label="Remover item" (click)="removeItem(category.id, item.id)"><ion-icon name="close-outline"></ion-icon></button></span> }</div>
+                }
+              }
+            } @else {
+              <div class="category-suggestion">
+                <span>Ideias para começar</span>
+                <button type="button" (click)="newCategoryName = 'Entradas'; addCategory()">Entradas</button>
+                <button type="button" (click)="newCategoryName = 'Pratos executivos'; addCategory()">Pratos executivos</button>
+                <button type="button" (click)="newCategoryName = 'Bebidas e drinks'; addCategory()">Bebidas e drinks</button>
+              </div>
+            }
+            @if (errorMessage) { <p class="form-alert" role="alert">{{ errorMessage }}</p> }
+            <ion-button class="admin-primary" expand="block" (click)="publish()">Publicar cardápio <ion-icon slot="end" name="arrow-forward-outline"></ion-icon></ion-button>
+            <button class="back-step" type="button" (click)="step = 3">Voltar ao perfil</button>
+          </div>
+        }
+      </div>
+    </section>
+
+    <footer class="admin-footer">Prévia local · A confirmação por e-mail e a publicação real serão conectadas ao backend depois</footer>
+  </main>
+</ion-content>

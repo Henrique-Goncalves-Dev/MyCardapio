@@ -1,23 +1,121 @@
-<ion-header [translucent]="true">
+<ion-header class="site-header" [translucent]="false">
   <ion-toolbar>
-    <ion-title> Inbox </ion-title>
+    <div class="topbar">
+      <a class="wordmark" routerLink="/home" aria-label="Meu Cardápio, início">
+        <span class="wordmark-mark" aria-hidden="true"><img src="assets/icon/meu-cardapio-pin.png" alt="" /></span>
+        <span>meu<span class="wordmark-light">cardápio</span></span>
+      </a>
+      <a class="owner-link" routerLink="/gestao/entrar">Sou um estabelecimento <ion-icon name="arrow-forward-outline"></ion-icon></a>
+    </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
+  <main class="home-shell">
+    <section class="welcome" aria-labelledby="welcome-title">
+      <div class="welcome-copy">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> Comida boa, perto de você</p>
+        <h1 id="welcome-title">Seu próximo<br />prato favorito<br /><span>está por aqui.</span></h1>
+        <p class="welcome-description">Descubra cardápios de lugares do seu bairro. Sem cadastro, sem pressa: só escolher e conhecer.</p>
 
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large"> Inbox </ion-title>
-    </ion-toolbar>
-  </ion-header>
+        <div class="search-box">
+          <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+          <input
+            type="search"
+            aria-label="Buscar estabelecimento, prato ou bairro"
+            placeholder="Busque um lugar, prato ou bairro"
+            [ngModel]="query()"
+            (ngModelChange)="search($event)"
+          />
+          @if (query()) {
+            <button class="clear-search" type="button" aria-label="Limpar busca" (click)="search('')">×</button>
+          }
+        </div>
 
-  <ion-list>
-    @for (message of messages; track message.id) {
-    <app-message [message]="message"></app-message>
-    }
-  </ion-list>
+        <div class="welcome-actions">
+          <ion-button class="nearby-button" (click)="useLocation()" [disabled]="locationState() === 'loading'">
+            <ion-icon slot="start" name="navigate-outline"></ion-icon>
+            {{ locationState() === 'loading' ? 'Procurando…' : 'Perto de mim' }}
+          </ion-button>
+          <span class="privacy-note"><ion-icon name="location-outline"></ion-icon> Sua localização não fica salva</span>
+        </div>
+        @if (locationMessage()) {
+          <p class="location-message" [class.location-error]="locationState() === 'denied' || locationState() === 'unavailable'" role="status">
+            {{ locationMessage() }}
+          </p>
+        }
+      </div>
+
+      <div class="welcome-art" aria-label="Prato colorido com ingredientes frescos" role="img">
+        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=85" alt="Mesa com pratos preparados e ingredientes frescos" />
+        <div class="art-stamp"><span>feito</span><strong>por perto</strong><i aria-hidden="true">✳</i></div>
+        <div class="art-caption"><span class="caption-line"></span> Cardápios de verdade, de lugares reais</div>
+      </div>
+    </section>
+
+    <section class="catalog" aria-labelledby="catalog-title">
+      <div class="catalog-heading">
+        <div>
+          <p class="section-kicker">Escolha com calma</p>
+          <h2 id="catalog-title">
+            @if (query()) { Resultados para “{{ query() }}” }
+            @else if (locationState() === 'ready') { Perto de você }
+            @else { Lugares para conhecer }
+          </h2>
+        </div>
+        <p class="result-count">{{ results().length }} {{ results().length === 1 ? 'lugar' : 'lugares' }}</p>
+      </div>
+
+      <div class="cuisine-filters" role="group" aria-label="Filtrar por tipo de comida">
+        @for (cuisine of cuisines(); track cuisine) {
+          <button type="button" class="filter-chip" [class.active]="selectedCuisine() === cuisine" (click)="selectCuisine(cuisine)">
+            {{ cuisine }}
+          </button>
+        }
+      </div>
+
+      @if (results().length) {
+        <div class="establishment-list">
+          @for (entry of results(); track entry.id; let index = $index) {
+            <article class="establishment-row">
+              <a class="establishment-photo" [routerLink]="['/estabelecimento', entry.slug]" [attr.aria-label]="'Ver cardápio de ' + entry.name">
+                <img [src]="entry.image || 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&q=80'" [alt]="'Prato de ' + entry.name" loading="lazy" />
+                <span class="photo-index">{{ ('0' + (index + 1)).slice(-2) }}</span>
+              </a>
+              <div class="establishment-info">
+                <div class="row-title-line">
+                  <a [routerLink]="['/estabelecimento', entry.slug]" class="establishment-name">{{ entry.name }}</a>
+                  <span class="open-status" [class.closed]="!openNow(entry)"><span></span>{{ openNow(entry) ? 'Aberto' : 'Fechado' }}</span>
+                </div>
+                <p class="establishment-meta">{{ entry.cuisines.join(' · ') }} <span class="meta-divider">/</span> {{ entry.neighborhood }}</p>
+                @if (entry.description) {
+                  <p class="establishment-description">{{ entry.description }}</p>
+                }
+                <div class="row-footer">
+                  <span class="address-line"><ion-icon name="location-outline"></ion-icon> {{ entry.neighborhood }}, {{ entry.city }}</span>
+                  @if (distanceLabel(entry); as distance) {
+                    <span class="distance"><ion-icon name="navigate-outline"></ion-icon> {{ distance }}</span>
+                  }
+                  <a class="view-menu" [routerLink]="['/estabelecimento', entry.slug]">Ver cardápio <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <span class="empty-mark" aria-hidden="true">⌕</span>
+          <h3>Nenhum lugar encontrado</h3>
+          <p>Tente outro prato, tipo de comida ou bairro.</p>
+          <button class="text-button" type="button" (click)="search(''); selectCuisine('Tudo')">Limpar busca</button>
+        </div>
+      }
+    </section>
+
+    <footer class="home-footer">
+      <span class="wordmark-small"><span class="wordmark-mark" aria-hidden="true"><img src="assets/icon/meu-cardapio-pin.png" alt="" /></span> meu<span>cardápio</span></span>
+      <p>Um bom lugar começa por um bom cardápio.</p>
+      <a routerLink="/gestao/entrar">Tem um estabelecimento? Cadastre seu cardápio</a>
+    </footer>
+  </main>
 </ion-content>

@@ -6,8 +6,20 @@ export const routes: Routes = [
     loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
   },
   {
-    path: 'message/:id',
-    loadComponent: () => import('./view-message/view-message.page').then((m) => m.ViewMessagePage),
+    path: 'estabelecimento/:slug',
+    loadComponent: () => import('./establishment-detail/establishment-detail.page').then((m) => m.EstablishmentDetailPage),
+  },
+  {
+    path: 'gestao/entrar',
+    loadComponent: () => import('./restaurant-admin/restaurant-login.page').then((m) => m.RestaurantLoginPage),
+  },
+  {
+    path: 'gestao/cadastro',
+    loadComponent: () => import('./restaurant-admin/restaurant-signup.page').then((m) => m.RestaurantSignupPage),
+  },
+  {
+    path: 'gestao',
+    loadComponent: () => import('./restaurant-admin/restaurant-dashboard.page').then((m) => m.RestaurantDashboardPage),
   },
   {
     path: '',

@@ -1,0 +1,272 @@
+:host {
+  display: block;
+}
+
+ion-content {
+  --background: var(--app-mist);
+}
+
+.admin-page {
+  min-height: 100%;
+  padding: 22px max(20px, calc((100vw - 1120px) / 2));
+}
+
+.admin-topbar {
+  display: flex;
+  height: 54px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--app-ink);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  text-decoration: none;
+}
+
+.admin-brand span:last-child span {
+  color: var(--app-leaf);
+}
+
+.admin-brand-mark {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+}
+
+.admin-brand-mark img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+}
+
+.admin-top-link {
+  color: var(--app-pine);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-layout {
+  display: grid;
+  min-height: min(760px, calc(100vh - 120px));
+  grid-template-columns: minmax(280px, 0.9fr) minmax(420px, 1.1fr);
+  gap: clamp(30px, 7vw, 95px);
+  align-items: center;
+  padding: 35px 5vw;
+  border: 1px solid #dce5dd;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.admin-intro {
+  max-width: 430px;
+}
+
+.admin-kicker {
+  margin: 0 0 13px;
+  color: var(--app-leaf);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-intro h1 {
+  margin: 0 0 15px;
+  color: var(--app-ink);
+  font: 500 clamp(38px, 4vw, 57px) / 1.03 Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.05em;
+}
+
+.admin-intro > p:last-child {
+  max-width: 360px;
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.admin-form {
+  display: grid;
+  gap: 15px;
+  width: min(100%, 420px);
+  justify-self: end;
+}
+
+.admin-form h2 {
+  margin: 0 0 4px;
+  color: var(--app-ink);
+  font: 500 27px Georgia, 'Times New Roman', serif;
+}
+
+.form-hint {
+  margin: -4px 0 3px;
+  color: #75837b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+}
+
+.field label {
+  color: #4d5f56;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  min-height: 45px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #d5e0d6;
+  border-radius: 4px;
+  background: #fbfcfa;
+  color: var(--app-ink);
+  font: inherit;
+  font-size: 13px;
+}
+
+.field textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--app-leaf);
+  outline: 3px solid rgba(47, 108, 87, 0.14);
+}
+
+.admin-primary {
+  --background: var(--app-pine);
+  --background-hover: #245449;
+  --color: white;
+  --border-radius: 4px;
+  --box-shadow: none;
+  min-height: 47px;
+  margin: 3px 0 0;
+  font-size: 13px;
+  font-weight: 750;
+  text-transform: none;
+}
+
+.admin-primary ion-icon {
+  color: var(--app-lime);
+}
+
+.admin-secondary {
+  --color: var(--app-pine);
+  --border-color: #cfdbd0;
+  --border-radius: 4px;
+  min-height: 43px;
+  text-transform: none;
+}
+
+.form-alert,
+.form-success,
+.demo-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.form-alert {
+  background: #fff0e9;
+  color: #8d472f;
+}
+
+.form-success {
+  background: #e6f2e5;
+  color: #315d3b;
+}
+
+.demo-note {
+  border-left: 3px solid var(--app-lime);
+  background: #f4f7ed;
+  color: #5d6e63;
+}
+
+.admin-form .text-link {
+  justify-self: center;
+  color: var(--app-leaf);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d9e3d9;
+}
+
+.step-dot.active {
+  width: 24px;
+  border-radius: 10px;
+  background: var(--app-leaf);
+}
+
+.step-label {
+  margin-left: 4px;
+  color: #728178;
+  font-size: 11px;
+}
+
+.admin-footer {
+  padding: 18px 4px 0;
+  color: #7c8981;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .admin-page {
+    padding: 14px 16px 28px;
+  }
+
+  .admin-layout {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 27px;
+    padding: 28px 22px;
+  }
+
+  .admin-form {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .admin-intro h1 {
+    font-size: 42px;
+  }
+}

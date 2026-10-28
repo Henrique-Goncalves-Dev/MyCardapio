@@ -1,0 +1,104 @@
+<ion-header class="detail-header">
+  <ion-toolbar>
+    <div class="detail-topbar">
+      <a routerLink="/home" class="back-link"><ion-icon name="arrow-back-outline"></ion-icon> Voltar ao catálogo</a>
+      <a class="wordmark compact" routerLink="/home"><span class="wordmark-mark" aria-hidden="true"><img src="assets/icon/meu-cardapio-pin.png" alt="" /></span><span>meu<span>cardápio</span></span></a>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  @if (entry(); as restaurant) {
+    <main class="detail-shell">
+      <section class="profile-hero" aria-labelledby="establishment-name">
+        <div class="profile-photo">
+          @if (restaurant.image) {
+            <img [src]="restaurant.image" [alt]="'Prato de ' + restaurant.name" />
+          } @else {
+            <div class="photo-placeholder" aria-hidden="true">{{ restaurant.name.slice(0, 1) }}</div>
+          }
+        </div>
+        <div class="profile-copy">
+          <div class="profile-eyebrow">{{ restaurant.cuisines.join(' · ') }}</div>
+          <h1 id="establishment-name">{{ restaurant.name }}</h1>
+          <p class="profile-description">{{ restaurant.description || 'Um cardápio feito para conhecer com calma.' }}</p>
+          <div class="profile-facts">
+            <span class="open-status" [class.closed]="!openNow(restaurant)"><span></span>{{ openNow(restaurant) ? 'Aberto agora' : 'Fechado agora' }}</span>
+            <span class="fact-separator"></span>
+            <span class="fact-address"><ion-icon name="location-outline"></ion-icon>{{ restaurant.address }}, {{ restaurant.neighborhood }}</span>
+          </div>
+          <div class="profile-actions">
+            <a class="map-button" [href]="mapUrl(restaurant)" target="_blank" rel="noopener noreferrer">
+              <ion-icon name="navigate-outline"></ion-icon> Ver rota
+            </a>
+            @if (phoneUrl(restaurant); as phone) {
+              <a class="contact-link" [href]="phone"><ion-icon name="call-outline"></ion-icon> Ligar</a>
+            }
+            @if (whatsappUrl(restaurant); as whatsapp) {
+              <a class="contact-link" [href]="whatsapp" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="menu-section" aria-labelledby="menu-title">
+        <div class="menu-heading">
+          <div>
+            <p class="section-kicker">Feito por {{ restaurant.name }}</p>
+            <h2 id="menu-title">Cardápio</h2>
+          </div>
+          <span class="menu-note">{{ restaurant.categories.length }} {{ restaurant.categories.length === 1 ? 'categoria' : 'categorias' }}</span>
+        </div>
+
+        <nav class="category-nav" aria-label="Seções do cardápio">
+          @for (category of restaurant.categories; track category.id) {
+            <button type="button" [class.active]="activeCategory() === category.id" (click)="selectCategory(category.id)">
+              {{ category.name }}
+            </button>
+          }
+        </nav>
+
+        <div class="menu-content">
+          @for (category of restaurant.categories; track category.id) {
+            <section class="menu-category" [id]="'menu-' + category.id" [attr.aria-labelledby]="'category-' + category.id">
+              <div class="category-heading">
+                <h3 [id]="'category-' + category.id">{{ category.name }}</h3>
+                <span>{{ ('0' + category.items.length).slice(-2) }}</span>
+              </div>
+              @if (category.items.length) {
+                <div class="menu-items">
+                  @for (item of category.items; track item.id) {
+                    <article class="menu-item" [class.item-unavailable]="!item.available">
+                      <div class="item-copy">
+                        <div class="item-title-row">
+                          <h4>{{ item.name }}</h4>
+                          @if (!item.available) { <span class="unavailable-label">Indisponível</span> }
+                        </div>
+                        @if (item.description) { <p>{{ item.description }}</p> }
+                      </div>
+                      <span class="item-price">{{ price(item.price) }}</span>
+                    </article>
+                  }
+                </div>
+              } @else {
+                <p class="empty-category">Esta categoria ainda não tem itens.</p>
+              }
+            </section>
+          }
+        </div>
+      </section>
+
+      <footer class="detail-footer">
+        <a routerLink="/home" class="back-link"><ion-icon name="arrow-back-outline"></ion-icon> Explorar outros cardápios</a>
+        <span>Atualizado pelo estabelecimento</span>
+      </footer>
+    </main>
+  } @else {
+    <main class="not-found">
+      <span class="not-found-mark" aria-hidden="true">?</span>
+      <h1>Este lugar não está no catálogo</h1>
+      <p>Confira o endereço ou volte para explorar outros cardápios.</p>
+      <ion-button routerLink="/home">Voltar ao catálogo</ion-button>
+    </main>
+  }
+</ion-content>

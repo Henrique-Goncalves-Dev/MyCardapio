@@ -1,0 +1,114 @@
+<ion-content [fullscreen]="true">
+  @if (draft; as restaurant) {
+    <main class="admin-page dashboard-page">
+      <header class="admin-topbar dashboard-topbar">
+        <a class="admin-brand" routerLink="/home"><span class="admin-brand-mark" aria-hidden="true"><img src="assets/icon/meu-cardapio-pin.png" alt="" /></span><span>meu<span>cardápio</span></span></a>
+        <div class="dashboard-top-actions">
+          <a class="admin-top-link" [routerLink]="['/estabelecimento', restaurant.slug]"><ion-icon name="eye-outline"></ion-icon> Ver página pública</a>
+          <button class="signout-button" type="button" (click)="signOut()"><ion-icon name="log-out-outline"></ion-icon><span>Sair</span></button>
+        </div>
+      </header>
+
+      <section class="dashboard-heading">
+        <div>
+          <p class="admin-kicker">Área do estabelecimento · prévia local</p>
+          <h1>Olá, {{ restaurant.name }}.</h1>
+          <p>Cuide das informações que aparecem para quem consulta seu cardápio.</p>
+        </div>
+        <button type="button" class="status-toggle" [class.is-closed]="restaurant.temporarilyClosed" (click)="toggleClosed()">
+          <span class="status-dot"></span>{{ restaurant.temporarilyClosed ? 'Fechado temporariamente' : 'Aberto conforme horário' }}
+        </button>
+      </section>
+
+      <nav class="dashboard-tabs" aria-label="Seções da gestão">
+        <button type="button" [class.active]="section === 'profile'" (click)="section = 'profile'; savedMessage = ''">Perfil e horários</button>
+        <button type="button" [class.active]="section === 'menu'" (click)="section = 'menu'; savedMessage = ''">Cardápio <span>{{ restaurant.categories.length }}</span></button>
+      </nav>
+
+      @if (savedMessage) { <p class="save-message" role="status"><ion-icon name="checkmark-outline"></ion-icon>{{ savedMessage }}</p> }
+
+      @if (section === 'profile') {
+        <section class="dashboard-content profile-content">
+          <form class="dashboard-card profile-card" (ngSubmit)="saveProfile()">
+            <div class="card-heading"><div><p class="admin-kicker">Como as pessoas encontram você</p><h2>Perfil público</h2></div><span class="card-index">01</span></div>
+            <div class="field-grid">
+              <label class="field"><span>Nome do estabelecimento</span><input name="name" [(ngModel)]="restaurant.name" required /></label>
+              <label class="field"><span>Tipos de comida <small>separe por vírgula</small></span><input name="cuisines" [(ngModel)]="cuisineText" placeholder="Brasileira, Nordestina" /></label>
+              <label class="field"><span>Cidade</span><input name="city" [(ngModel)]="restaurant.city" /></label>
+              <label class="field"><span>Bairro</span><input name="neighborhood" [(ngModel)]="restaurant.neighborhood" /></label>
+              <label class="field field-wide"><span>Endereço</span><input name="address" [(ngModel)]="restaurant.address" /></label>
+              <label class="field"><span>Telefone <small>opcional</small></span><input name="phone" [(ngModel)]="restaurant.phone" type="tel" /></label>
+              <label class="field"><span>WhatsApp <small>opcional</small></span><input name="whatsapp" [(ngModel)]="restaurant.whatsapp" type="tel" /></label>
+              <label class="field field-wide"><span>Descrição <small>opcional</small></span><textarea name="description" [(ngModel)]="restaurant.description"></textarea></label>
+              <label class="field field-wide"><span>Link da foto <small>opcional nesta prévia</small></span><input name="image" [(ngModel)]="restaurant.image" type="url" placeholder="https://..." /></label>
+            </div>
+            <ion-button class="admin-primary save-button" type="submit"><ion-icon slot="start" name="checkmark-outline"></ion-icon>Salvar perfil</ion-button>
+          </form>
+
+          <section class="dashboard-card hours-card">
+            <div class="card-heading"><div><p class="admin-kicker">Sua semana</p><h2>Horários de funcionamento</h2></div><span class="card-index">02</span></div>
+            <p class="card-description">Ajuste os horários que aparecem no catálogo público.</p>
+            <div class="hours-list">
+              @for (day of days; track day[0]) {
+                <div class="hours-row"><span>{{ day[1] }}</span><label><span class="sr-only">Abertura {{ day[1] }}</span><input type="time" [name]="day[0] + '-open'" [(ngModel)]="restaurant.hours[day[0]][0].opens" /></label><span class="hours-separator">até</span><label><span class="sr-only">Fechamento {{ day[1] }}</span><input type="time" [name]="day[0] + '-close'" [(ngModel)]="restaurant.hours[day[0]][0].closes" /></label></div>
+              }
+            </div>
+            <ion-button class="admin-primary save-button" (click)="saveProfile()"><ion-icon slot="start" name="checkmark-outline"></ion-icon>Salvar horários</ion-button>
+          </section>
+        </section>
+      } @else {
+        <section class="dashboard-content menu-content">
+          <div class="menu-editor-heading"><div><p class="admin-kicker">Organize a sua página</p><h2>Seu cardápio</h2><p>As alterações salvas ficam visíveis no link público.</p></div><span class="menu-count">{{ restaurant.categories.length }} categorias</span></div>
+
+          <section class="dashboard-card add-category-card">
+            <div class="category-add-row"><label class="field"><span>Nova categoria</span><input aria-label="Nome da nova categoria" [(ngModel)]="newCategoryName" placeholder="Ex.: Bebidas e drinks" /></label><ion-button class="admin-primary" (click)="addCategory()"><ion-icon slot="start" name="add-outline"></ion-icon>Adicionar</ion-button></div>
+          </section>
+
+          <div class="menu-columns">
+            <div class="category-editor-list">
+              @for (category of restaurant.categories; track category.id; let categoryIndex = $index) {
+                <section class="dashboard-card category-editor">
+                  <div class="category-editor-heading">
+                    <label class="field"><span>Categoria</span><input [name]="'category-' + category.id" [(ngModel)]="category.name" (change)="saveMenu()" /></label>
+                    <div class="reorder-actions" aria-label="Reordenar categoria"><button type="button" [disabled]="categoryIndex === 0" aria-label="Mover categoria para cima" (click)="moveCategory(categoryIndex, -1)"><ion-icon name="arrow-up-outline"></ion-icon></button><button type="button" [disabled]="categoryIndex === restaurant.categories.length - 1" aria-label="Mover categoria para baixo" (click)="moveCategory(categoryIndex, 1)"><ion-icon name="arrow-down-outline"></ion-icon></button><button type="button" class="delete-action" aria-label="Excluir categoria" (click)="removeCategory(category.id)"><ion-icon name="trash-outline"></ion-icon></button></div>
+                  </div>
+                  @if (category.items.length) {
+                    <div class="menu-item-list">
+                      @for (item of category.items; track item.id; let itemIndex = $index) {
+                        <article class="menu-item-editor" [class.item-unavailable]="!item.available">
+                          <div class="item-editor-fields">
+                            <label class="field"><span>Nome do item</span><input [name]="'item-name-' + item.id" [(ngModel)]="item.name" (change)="saveMenu()" /></label>
+                            <label class="field"><span>Preço</span><div class="price-input"><span>R$</span><input [name]="'item-price-' + item.id" [(ngModel)]="item.price" type="number" min="0" step="0.01" (change)="saveMenu()" /></div></label>
+                            <label class="field field-wide"><span>Descrição</span><input [name]="'item-description-' + item.id" [(ngModel)]="item.description" (change)="saveMenu()" /></label>
+                          </div>
+                          <div class="item-editor-actions"><button type="button" class="availability-toggle" [class.available]="item.available" (click)="toggleItem(item)">{{ item.available ? 'Disponível' : 'Indisponível' }}</button><div class="reorder-actions"><button type="button" [disabled]="itemIndex === 0" aria-label="Mover item para cima" (click)="moveItem(category.id, itemIndex, -1)"><ion-icon name="arrow-up-outline"></ion-icon></button><button type="button" [disabled]="itemIndex === category.items.length - 1" aria-label="Mover item para baixo" (click)="moveItem(category.id, itemIndex, 1)"><ion-icon name="arrow-down-outline"></ion-icon></button><button type="button" class="delete-action" aria-label="Excluir item" (click)="removeItem(category.id, item.id)"><ion-icon name="trash-outline"></ion-icon></button></div></div>
+                        </article>
+                      }
+                    </div>
+                  } @else {
+                    <p class="empty-category">Esta categoria ainda não tem itens.</p>
+                  }
+                </section>
+              } @empty {
+                <div class="empty-menu"><span>01</span><h3>Seu cardápio começa por uma categoria.</h3><p>Crie uma seção como “Entradas”, “Pratos executivos” ou “Bebidas e drinks”.</p></div>
+              }
+            </div>
+
+            <section class="dashboard-card add-item-card">
+              <p class="admin-kicker">Novo item</p><h3>Acrescente ao cardápio</h3>
+              <label class="field"><span>Categoria</span><select name="newItemCategory" [(ngModel)]="newItemCategoryId"><option value="" disabled>Escolha uma categoria</option>@for (category of restaurant.categories; track category.id) { <option [value]="category.id">{{ category.name }}</option> }</select></label>
+              <label class="field"><span>Nome</span><input name="newItemName" [(ngModel)]="newItemName" placeholder="Ex.: Carne de sol da casa" /></label>
+              <label class="field"><span>Descrição <small>opcional</small></span><textarea name="newItemDescription" [(ngModel)]="newItemDescription" placeholder="Acompanhamentos e detalhes"></textarea></label>
+              <label class="field"><span>Preço</span><div class="price-input"><span>R$</span><input name="newItemPrice" [(ngModel)]="newItemPrice" type="number" min="0" step="0.01" placeholder="0,00" /></div></label>
+              <ion-button class="admin-primary" expand="block" [disabled]="!restaurant.categories.length" (click)="addItem()"><ion-icon slot="start" name="add-outline"></ion-icon>Adicionar item</ion-button>
+            </section>
+          </div>
+          <p class="menu-save-hint"><ion-icon name="checkmark-outline"></ion-icon> Suas edições são salvas automaticamente nesta prévia local.</p>
+        </section>
+      }
+      <footer class="dashboard-footer"><span>Prévia local · Os dados ficam salvos neste navegador.</span><a [routerLink]="['/estabelecimento', restaurant.slug]">Abrir página pública <ion-icon name="arrow-forward-outline"></ion-icon></a></footer>
+    </main>
+  } @else {
+    <div class="dashboard-loading" aria-label="Carregando gestão"><span></span></div>
+  }
+</ion-content>
